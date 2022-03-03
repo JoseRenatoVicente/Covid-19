@@ -12,7 +12,7 @@ namespace Covid_19
             Inicio = Fim = null;
         }
 
-        public Paciente Push(Paciente novoPaciente)
+        public void Push(Paciente novoPaciente)
         {
             if (EstaVazio())
             {
@@ -24,21 +24,22 @@ namespace Covid_19
                 Fim.Proximo = novoPaciente;
                 Fim = novoPaciente;
             }
-
-            return novoPaciente;
         }
 
-        public bool Pop()
+        public Paciente Pop()
         {
-            if (EstaVazio()) return false;
+            Paciente antigoPaciente = Inicio;
+            if (EstaVazio()) return null;
+            else if (Inicio.Proximo == null)
+                Fim = Inicio = null;
             else
             {
+
                 Inicio = Inicio.Proximo;
             }
-
-            return true;
+            antigoPaciente.Proximo = null;
+            return antigoPaciente;
         }
-
 
         public bool EstaVazio()
         {

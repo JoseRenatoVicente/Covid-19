@@ -6,15 +6,10 @@ namespace Covid_19
     {
         public Paciente Inicio { get; set; }
         public Paciente Fim { get; set; }
-
-        public FilaPaciente FilaPreferencial = new FilaPaciente();
-        public FilaPaciente FilaNormal = new FilaPaciente();
-
         public ListaPacientes()
         {
             Inicio = Fim = null;
         }
-
 
         public Paciente[] ObterTodos()
         {
@@ -27,33 +22,8 @@ namespace Covid_19
                 Paciente paciente = Inicio;
                 do
                 {
-                    if (paciente != null)
-                    {
                         pacientes[count++] = paciente;
-                    }
-                    paciente = paciente.Proximo;
 
-                } while (paciente != null);
-            }
-
-            return pacientes;
-        }
-
-        public Paciente[] PegarFila()
-        {
-            Paciente[] pacientes = new Paciente[Count()];
-            int count = 0;
-
-            if (EstaVazio()) return null;
-            else
-            {
-                Paciente paciente = Inicio;
-                do
-                {
-                    if (paciente != null)
-                    {
-                        pacientes[count++] = paciente;
-                    }
                     paciente = paciente.Proximo;
 
                 } while (paciente != null);
@@ -118,14 +88,7 @@ namespace Covid_19
         }
 
         public Paciente Push(Paciente novoPaciente)
-        {
-           
-
-            if (novoPaciente.Idade >= 60)
-                FilaPreferencial.Push(novoPaciente);
-            else
-                FilaNormal.Push(novoPaciente);
-
+        {          
             if (EstaVazio())
             {
                 novoPaciente.Senha = 1;

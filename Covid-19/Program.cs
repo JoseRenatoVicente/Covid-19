@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Covid_19.Entities;
+using System;
 
 namespace Covid_19
 {
@@ -8,8 +9,12 @@ namespace Covid_19
         static CovidRepositorio covid = new CovidRepositorio();
         static void Main(string[] args)
         {
-            covid.ReadFile();
-            covid.WriteFile();
+            service.AdicionaPacienteFila(new Paciente("Jose", "1234", DateTime.Parse("22/04/2004")));
+            service.AdicionaPacienteFila(new Paciente("Joao", "2345", DateTime.Parse("23/06/2002")));
+
+            service.AdicionaPacienteFila(new Paciente("Jose pre", "3456", DateTime.Parse("22/04/1900")));
+            service.AdicionaPacienteFila(new Paciente("Jose pre", "4567", DateTime.Parse("22/04/1900")));
+
             Menu();
         }
 
@@ -20,7 +25,8 @@ namespace Covid_19
 
                                 1) Cadastro de um Paciente
                                 2) Buscar Paciente
-                                3) Fila de pacientes
+                                3) Triagem
+                                4) Mudar configurações do sistema
                                 ------------------------------
                                 0) - Sair
 ");
@@ -45,7 +51,7 @@ namespace Covid_19
 
                 case "3":
                     Console.Clear();
-                    service.ObterTodosPacientes();
+                    service.Triagem();
                     BackMenu();
                     break;
 

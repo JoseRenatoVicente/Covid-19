@@ -12,7 +12,7 @@ namespace Covid_19
         {
             try
             {
-                StreamWriter sw = new StreamWriter("c:\\5by5\\Pacientes.csv");
+                StreamWriter sw = new StreamWriter("c:\\5by5\\Pacientes.txt");
 
                 Paciente[] pacientes = listaPacientes.ObterTodos();
 
@@ -46,9 +46,19 @@ namespace Covid_19
                     paciente.Nome = values[0];
                     paciente.CPF = values[1];
                     paciente.DataNascimento = DateTime.Parse(values[2]);
-                    paciente.Idade = int.Parse(values[3]);
-                    paciente.PossuiComorbidade = bool.Parse(values[4]);
-                    paciente.PassouTriagem = bool.Parse(values[5]);
+                    paciente.PossuiComorbidade = bool.Parse(values[3]);
+                    paciente.PassouTriagem = bool.Parse(values[4]);
+
+
+                    string[] valoresComorbidades = values[5].Split('|');
+                    Comorbidade[] comorbidades = new Comorbidade[valoresComorbidades.Length-1];
+
+                    for (int i = 0; i < valoresComorbidades.Length -1; i++)
+                    {
+                        comorbidades[i] = new Comorbidade(valoresComorbidades[i]);
+                    }
+
+                    paciente.Comorbidades = comorbidades;
 
                     paciente.Proximo = null;
 
