@@ -22,7 +22,7 @@ namespace Covid_19
                 Paciente paciente = Inicio;
                 do
                 {
-                        pacientes[count++] = paciente;
+                    pacientes[count++] = paciente;
 
                     paciente = paciente.Proximo;
 
@@ -74,21 +74,27 @@ namespace Covid_19
         {
             Paciente paciente = Inicio;
 
-            while (paciente.Proximo != null)
+            if (EstaVazio()) return null;
+            else
             {
 
-                if (cpf == paciente.Proximo.CPF)
+                while (paciente.Proximo != null)
                 {
-                    return paciente.Proximo;
-                }
-                paciente = paciente.Proximo;
-            }
 
-            return paciente.Proximo;
+                    if (cpf == paciente.CPF)
+                    {
+                        return paciente;
+                    }
+                    paciente = paciente.Proximo;
+                }
+            }
+            return paciente;
         }
 
         public Paciente Push(Paciente novoPaciente)
-        {          
+        {
+            novoPaciente.Proximo = null;
+
             if (EstaVazio())
             {
                 novoPaciente.Senha = 1;

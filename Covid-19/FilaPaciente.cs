@@ -1,4 +1,7 @@
-﻿using Covid_19.Entities;
+﻿using Covid_19.Entidades.Enums;
+using Covid_19.Entities;
+using System;
+using System.IO;
 
 namespace Covid_19
 {
@@ -7,13 +10,90 @@ namespace Covid_19
         public Paciente Inicio { get; set; }
         public Paciente Fim { get; set; }
 
-        public FilaPaciente()
+        private string NomeArquivo;
+
+        public FilaPaciente(string nomeArquivo)
         {
+            NomeArquivo = nomeArquivo;
+            //LerArquivo();
+
             Inicio = Fim = null;
         }
 
-        public void Push(Paciente novoPaciente)
+        public void LerArquivo()
         {
+            StreamReader sr = new StreamReader(NomeArquivo);
+
+            int count = 0;
+            string line = sr.ReadLine();
+
+            while (line != "")
+            {
+                Paciente paciente = new Paciente();
+                String[] values = line.Split(';');
+
+
+                paciente.Nome = values[0];
+                paciente.CPF = values[1];
+                //paciente.DataNascimento = DateTime.Parse(values[2]);
+                //paciente.Triagem.DiasSintomas = Convert.ToInt32(dias);
+                //paciente.Triagem.PossuiComorbidade = bool.Parse(values[4]);
+                //paciente.PassouTriagem = bool.Parse(values[5]);
+
+                paciente.Proximo = null;
+
+                Push(paciente);
+
+                count++;
+                line = sr.ReadLine();
+            }
+
+            sr.Close();
+        }
+        public Paciente[] ObterTodos()
+        {
+            Paciente[] pacientes = new Paciente[Count()];
+            int count = 0;
+
+            if (EstaVazio()) return null;
+            else
+            {
+                Paciente paciente = Inicio;
+                do
+                {
+                    pacientes[count++] = paciente;
+
+                    paciente = paciente.Proximo;
+
+                } while (paciente != null);
+            }
+
+            return pacientes;
+        }
+
+        public int Count()
+        {
+            if (EstaVazio()) return 0;
+            else
+            {
+                Paciente paciente = Inicio;
+                int count = 0;
+                do
+                {
+                    count++;
+                    paciente = paciente.Proximo;
+
+                } while (paciente != null);
+                return count;
+            }
+
+        }
+
+        public Paciente Push(Paciente novoPaciente)
+        {
+            novoPaciente.Proximo = null;
+
+            Paciente paciente = Inicio;
             if (EstaVazio())
             {
                 Inicio = Fim = novoPaciente;
@@ -24,6 +104,29 @@ namespace Covid_19
                 Fim.Proximo = novoPaciente;
                 Fim = novoPaciente;
             }
+            SalvarCSV();
+            return paciente;
+        }
+
+        public void SalvarCSV()
+        {
+            StreamWriter sw = new StreamWriter(NomeArquivo);
+
+            if (EstaVazio())
+            {
+                sw.WriteLine();
+            }
+            else
+            {
+                Paciente paciente = Inicio;
+                while (paciente != null)
+                {
+                    sw.WriteLine(paciente.ConverterParaCSV());
+
+                    paciente = paciente.Proximo;
+                }
+            }
+            sw.Close();
         }
 
         public Paciente Pop()
@@ -34,10 +137,11 @@ namespace Covid_19
                 Fim = Inicio = null;
             else
             {
-
                 Inicio = Inicio.Proximo;
             }
             antigoPaciente.Proximo = null;
+
+            SalvarCSV();
             return antigoPaciente;
         }
 
@@ -46,5 +150,6 @@ namespace Covid_19
             return (Inicio == null) && (Fim == null) ? true : false;
         }
     }
+
 
 }

@@ -8,8 +8,11 @@ namespace Covid_19
     {
         public ListaPacientes listaPacientes = new ListaPacientes();
 
-        public FilaPaciente filaPacientePreferencial = new FilaPaciente();
-        public FilaPaciente filaPacienteNormal = new FilaPaciente();
+        public FilaPaciente filaPacientePreferencial = new FilaPaciente("FilaPacientePreferencial.csv");
+        public FilaPaciente filaPacienteNormal = new FilaPaciente("FilaPacienteNormal.csv");
+        public FilaPaciente filaPacienteInternados = new FilaPaciente("FilaPacienteInternados.csv");
+
+        public Leitos configuracaoSistema = new Leitos();
 
         int contadorSenha;
         int contadorFilaPreferencial;
@@ -29,26 +32,62 @@ namespace Covid_19
             Console.Write("Digite o nome ou CPF do paciente para que seja localizado: ");
             Paciente[] pacientes = listaPacientes.BuscaPeloCPFNome(Console.ReadLine());
 
-            if (pacientes[0] == null)
+            if (pacientes == null)
                 Console.WriteLine("Paciente não encontrado");
-
-            foreach (Paciente paciente in pacientes)
-                if (paciente != null) Console.WriteLine(paciente.DadosCompletosPaciente());
-
+            else
+            {
+                foreach (Paciente paciente in pacientes)
+                    if (paciente != null) Console.WriteLine(paciente.DadosCompletosPaciente());
+            }
             return pacientes;
+        }
+
+        public void ListaEspera()
+        {
+            foreach (var paciente in filaPacienteInternados.ObterTodos())
+            {
+                if (paciente != null) Console.WriteLine(paciente.DadosCompletosPaciente());
+            }
+
+
         }
 
         public Paciente CadastroPaciente()
         {
+            Paciente paciente = new Paciente();
 
             Console.WriteLine("Proximo da fila de espera. Senha: " + (++contadorSenha));
 
-            Paciente paciente = AdicionaPacienteFila(EntradaDadosIniciaisPaciente(new Paciente()));
+            Console.Write("Infome o CPF: ");
+            string cpf = Console.ReadLine();
 
-            Console.WriteLine(paciente.DadosMinimosPaciente());
+            if (string.Empty == cpf)
+            {
+                Console.WriteLine("O CPF não pode ser vazio");
+                CadastroPaciente();
+            }
+            else
+            {
+                Paciente resultadoPaciente = listaPacientes.ObterPeloCPF(cpf);
 
-            Console.WriteLine();
-            Console.WriteLine("Paciente adicionado com sucesso");
+                if (resultadoPaciente == null)
+                {
+                    paciente = AdicionaPacienteFila(EntradaDadosIniciaisPaciente(new Paciente() { CPF = cpf }));
+
+                    Console.WriteLine(paciente.DadosMinimosPaciente());
+
+                    Console.WriteLine();
+                    Console.WriteLine("Paciente adicionado com sucesso");
+                }
+                else
+                {
+                    Console.WriteLine(resultadoPaciente.DadosCompletosPaciente());
+                    paciente = AdicionaPacienteFila(resultadoPaciente);
+
+                    Console.WriteLine();
+                    Console.WriteLine("Paciente adicionado com sucesso");
+                }
+            }
 
             return paciente;
         }
@@ -70,6 +109,8 @@ namespace Covid_19
 
         public void Triagem()
         {
+
+            EstaVazio();
 
             if (filaPacientePreferencial.EstaVazio() || contadorFilaPreferencial > 2)
             {
@@ -102,6 +143,7 @@ namespace Covid_19
 
         private Paciente EntradaDadosIniciaisPaciente(Paciente paciente)
         {
+
             if (paciente.Nome == null || paciente.Nome == "")
             {
                 Console.Write("Nome: ");
@@ -114,17 +156,6 @@ namespace Covid_19
                 }
             }
 
-            if (paciente.CPF == null || paciente.CPF == "")
-            {
-                Console.Write("CPF: ");
-                paciente.CPF = Console.ReadLine();
-
-                if (string.Empty == paciente.CPF)
-                {
-                    Console.WriteLine("O CPF não pode ser vazio");
-                    EntradaDadosIniciaisPaciente(paciente);
-                }
-            }
 
             if (paciente.DataNascimento == default(DateTime))
             {
@@ -138,25 +169,6 @@ namespace Covid_19
                 }
 
             }
-
-            if (paciente.Sexo == 0)
-            {
-                Console.Write("Digite o número referente ao Sexo: ");
-                Console.Write(@"
- 1- Masculino
- 2- Feminino
- 3- InterSexo
-");
-
-                if (Int32.TryParse(Console.ReadLine(), out int numeroSexo))
-                    if (numeroSexo >= 1 && numeroSexo <= 3)
-                        paciente.Sexo = (Sexo)numeroSexo;
-                    else
-                    {
-                        Console.WriteLine($"Formato incorreto digite um número referente ao sexo que seja válido");
-                        EntradaDadosIniciaisPaciente(paciente);
-                    }
-            }
             Console.Clear();
 
             return paciente;
@@ -165,12 +177,13 @@ namespace Covid_19
 
         private Paciente EntradaDadosPaciente(Paciente paciente)
         {
-            if (paciente.DiasSintomas == 0)
+
+            if (paciente.Triagem.DiasSintomas == 0)
             {
                 Console.Write("Dias sintomas: ");
                 if (Int32.TryParse(Console.ReadLine(), out int dias))
                     if (dias >= 1)
-                        paciente.DiasSintomas = dias;
+                        paciente.Triagem.DiasSintomas = dias;
                     else
                     {
                         Console.WriteLine("Os dias devem ser maio que 1");
@@ -178,24 +191,89 @@ namespace Covid_19
                     }
             }
 
-            if (paciente.PossuiComorbidade == false)
+            if (paciente.Triagem.DiasSintomas < 3)
+            {
+                Console.WriteLine("O paciente deve voltar após o terceiro dia para realizar o exame de covid");
+                return paciente;
+            }
+
+            if (paciente.Triagem.Pressao == 0)
+            {
+                Console.Write("Pressão: ");
+                if (double.TryParse(Console.ReadLine(), out double pressao))
+                    if (pressao >= 1)
+                        paciente.Triagem.Pressao = pressao;
+                    else
+                    {
+                        Console.WriteLine("A pressão tem que ser maior que 1");
+                        EntradaDadosPaciente(paciente);
+                    }
+            }
+
+            if (paciente.Triagem.BatimentosCardiacos == 0)
+            {
+                Console.Write("Batimentos Cardíacos: ");
+                if (Int32.TryParse(Console.ReadLine(), out int batimentosCardiacos))
+                    if (batimentosCardiacos >= 1)
+                        paciente.Triagem.BatimentosCardiacos = batimentosCardiacos;
+                    else
+                    {
+                        Console.WriteLine("Os Batimentos Cardíacos devem ser maior que 1");
+                        EntradaDadosPaciente(paciente);
+                    }
+            }
+
+            if (paciente.Triagem.Saturacao == 0)
+            {
+                Console.Write("Saturação: ");
+                if (Int32.TryParse(Console.ReadLine(), out int saturacao))
+                    if (saturacao >= 1)
+                        paciente.Triagem.Saturacao = saturacao;
+                    else
+                    {
+                        Console.WriteLine("A saturação deve ser maior que 1");
+                        EntradaDadosPaciente(paciente);
+                    }
+            }
+
+            if (paciente.Triagem.Temperatura == 0)
+            {
+                Console.Write("Temperatura: ");
+                if (double.TryParse(Console.ReadLine(), out double temperatura))
+                    if (temperatura >= 1)
+                        paciente.Triagem.Temperatura = temperatura;
+                    else
+                    {
+                        Console.WriteLine("A saturação deve ser maior que 1");
+                        EntradaDadosPaciente(paciente);
+                    }
+            }
+
+            if (paciente.Triagem.PossuiComorbidade == false)
             {
                 Console.WriteLine("O paciente possui alguma comobidade? Sim/Nao");
                 string comorbidade = Console.ReadLine().ToLower();
-                paciente.PossuiComorbidade = comorbidade == "sim" || comorbidade == "s" ? true : false;
+                paciente.Triagem.PossuiComorbidade = comorbidade == "sim" || comorbidade == "s" ? true : false;
             }
 
 
-            if (paciente.PossuiComorbidade)
+            if (paciente.Triagem.PossuiComorbidade)
             {
+                Console.Write("Quantas: ");
+                if (Int32.TryParse(Console.ReadLine(), out int quantidade))
+                    if (quantidade >= 1)
+                        paciente.Triagem.Saturacao = quantidade;
+                    else
+                    {
+                        Console.WriteLine("A quantidade deve ser maior que 1");
+                        EntradaDadosPaciente(paciente);
+                    }
+
                 Comorbidade[] comorbidades;
 
-                Console.WriteLine("O Paciente possui quantas comorbidades");
-                int contatorComobidades = int.Parse(Console.ReadLine());
+                comorbidades = new Comorbidade[quantidade];
 
-                comorbidades = new Comorbidade[contatorComobidades];
-
-                for (int i = 0; i != contatorComobidades; i++)
+                for (int i = 0; i != quantidade; i++)
                 {
                     comorbidades[i] = EntradaDadosComorbidades(new Comorbidade());
                 }
@@ -203,27 +281,57 @@ namespace Covid_19
                 paciente.Comorbidades = comorbidades;
             }
 
-            Console.Clear();
+            Console.WriteLine("Sintomas do COVID:");
+
+            Console.WriteLine("Perda paladar? Sim/Nao");
+            string perdaPaladar = Console.ReadLine().ToLower();
+            paciente.Triagem.SintomasCovid.PerdaPaladar = perdaPaladar == "sim" || perdaPaladar == "s" ? true : false;
+
+
+
+            if (paciente.PossuiNecessidadeInternacao())
+            {
+                Console.WriteLine("O paciente deve ser internado!");
+                if (!configuracaoSistema.PossuiVaga())
+                {
+                    Console.WriteLine("Não temos vaga, o paciente foi adicionado a lista de internação");
+                    filaPacienteInternados.Push(paciente);
+                }
+                else
+                {
+                    Console.WriteLine("Temos vaga");
+                    configuracaoSistema.LeitosOcupados++;
+                    paciente.EstaInternado = true;
+                }
+                return paciente;
+            }
+
+            paciente.PassouTriagem = true;
 
             return paciente;
-
         }
 
         private Comorbidade EntradaDadosComorbidades(Comorbidade comorbidade)
         {
-            if (comorbidade.NomeComorbidade == null || comorbidade.NomeComorbidade == "")
+            if (comorbidade.NomeComorbidade == null)
             {
-                Console.Write("Nome da Comorbidade: ");
+                Console.Write("Nome: ");
                 comorbidade.NomeComorbidade = Console.ReadLine();
 
                 if (string.Empty == comorbidade.NomeComorbidade)
                 {
                     Console.WriteLine("O nome não pode ser vazio");
-                    EntradaDadosComorbidades(comorbidade);
                 }
-            }
 
+            }
             return comorbidade;
+        }
+
+
+
+        public Paciente DarAltaPaciente(string cpf)
+        {
+            return new Paciente();
         }
 
         public Paciente EditarPaciente()
@@ -231,9 +339,23 @@ namespace Covid_19
             return new Paciente();
         }
 
+        public void ConfiguracoesSistema()
+        {
+            Console.Write("Qual a quantidade de leitos atualmente?: ");
+            if (int.TryParse(Console.ReadLine(), out int quantidadeLeitos))
+                if (quantidadeLeitos >= 1)
+                    configuracaoSistema.TotalLeitos = quantidadeLeitos;
+                else
+                {
+                    Console.WriteLine("Número de leitos inválido");
+                    ConfiguracoesSistema();
+                }
+
+        }
+
         public void EstaVazio()
         {
-            if (listaPacientes.EstaVazio())
+            if (filaPacienteNormal.EstaVazio() && filaPacientePreferencial.EstaVazio())
             {
                 Console.WriteLine("Nenhum paciente cadastrado no sistema");
                 Program.BackMenu();
