@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Covid_19.Entities.Paciente">
+    <Position X="4" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAIoAAAAAAAAYAEAAQCAESIgAAABBQAAAAEAAAA=</HashCode>
+      <FileName>Entidades\Paciente.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Triagem" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Covid_19.Entidades.SintomasCovid">
+    <Position X="9.25" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAAAAAAAAAAAAAAAAAAAgQAAAAAAAAABAAAAAgA=</HashCode>
+      <FileName>Entidades\SintomasCovid.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Covid_19.Entidades.Triagem">
+    <Position X="6.25" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgAAAAAAEgAAAAAAQAAAAEAEAAAAAABAgAAAA=</HashCode>
+      <FileName>Entidades\Triagem.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="SintomasCovid" />
+    </ShowAsAssociation>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

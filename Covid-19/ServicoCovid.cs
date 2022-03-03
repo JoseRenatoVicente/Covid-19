@@ -44,12 +44,16 @@ namespace Covid_19
 
         public void ListaEspera()
         {
-            foreach (var paciente in filaPacienteInternados.ObterTodos())
+            Paciente[] pacientes = filaPacienteInternados.ObterTodos();
+            if (pacientes != null)
+                foreach (var paciente in pacientes)
+                {
+                    if (paciente != null) Console.WriteLine(paciente.DadosCompletosPaciente());
+                }
+            else
             {
-                if (paciente != null) Console.WriteLine(paciente.DadosCompletosPaciente());
+                Console.WriteLine("Fila de espera vazia");
             }
-
-
         }
 
         public Paciente CadastroPaciente()
@@ -287,7 +291,27 @@ namespace Covid_19
             string perdaPaladar = Console.ReadLine().ToLower();
             paciente.Triagem.SintomasCovid.PerdaPaladar = perdaPaladar == "sim" || perdaPaladar == "s" ? true : false;
 
+            Console.WriteLine("Dificuldade de respirar? Sim/Nao");
+            string dificuldadeRespirar = Console.ReadLine().ToLower();
+            paciente.Triagem.SintomasCovid.DificuldadeRespirar = dificuldadeRespirar == "sim" || dificuldadeRespirar == "s" ? true : false;
 
+            Console.WriteLine("Perda Motora? Sim/Nao");
+            string perdaMotora = Console.ReadLine().ToLower();
+            paciente.Triagem.SintomasCovid.PerdaMotora = perdaMotora == "sim" || perdaMotora == "s" ? true : false;
+
+            Console.WriteLine("Perda Olfato? Sim/Nao");
+            string perdaOlfato = Console.ReadLine().ToLower();
+            paciente.Triagem.SintomasCovid.PerdaOlfato = perdaOlfato == "sim" || perdaOlfato == "s" ? true : false;
+
+
+            if (paciente.Triagem.NecessitaFazerExameCovid())
+            {
+                Console.WriteLine("O paciente deve realizar o exame de covid");
+
+                Console.WriteLine("Teste positivo? Sim/Não");
+                string testeCovid = Console.ReadLine().ToLower();
+                paciente.TesteCovidPositivo = testeCovid == "sim" || testeCovid == "s" ? true : false;
+            }
 
             if (paciente.PossuiNecessidadeInternacao())
             {
@@ -301,12 +325,36 @@ namespace Covid_19
                 {
                     Console.WriteLine("Temos vaga");
                     configuracaoSistema.LeitosOcupados++;
-                    paciente.EstaInternado = true;
+                    paciente.StatusPaciente = StatusPaciente.internado;
                 }
                 return paciente;
             }
 
-            paciente.PassouTriagem = true;
+            Console.WriteLine("O paciente será internado?");
+            string internacao = Console.ReadLine().ToLower();
+
+            paciente.StatusPaciente = (internacao == "sim" || internacao == "s") ? StatusPaciente.internado : StatusPaciente.Quarentena;
+
+            if (paciente.StatusPaciente == StatusPaciente.internado)
+            {
+                if (!configuracaoSistema.PossuiVaga())
+                {
+                    Console.WriteLine("Não temos vaga, o paciente foi adicionado a lista de internação");
+                    filaPacienteInternados.Push(paciente);
+                }
+                else
+                {
+                    Console.WriteLine("Temos vaga");
+                    configuracaoSistema.LeitosOcupados++;
+                    paciente.StatusPaciente = StatusPaciente.internado;
+                }
+                return paciente;
+            }
+            else
+            {
+                Console.WriteLine("O paciente deve cumprir quarentena");
+            }
+
 
             return paciente;
         }
@@ -329,9 +377,18 @@ namespace Covid_19
 
 
 
-        public Paciente DarAltaPaciente(string cpf)
+        public Paciente DarAltaPaciente()
         {
-            return new Paciente();
+            Paciente[] pacientes = ObterPacientesPorNomeCPF();
+
+            if (pacientes == null) return null;
+
+            pacientes[0].DataAlta = DateTime.Now;
+            pacientes[0].StatusPaciente = StatusPaciente.Alta;
+
+            listaPacientes.Editar(pacientes[0]);
+
+            return pacientes[0];
         }
 
         public Paciente EditarPaciente()
@@ -343,13 +400,36 @@ namespace Covid_19
         {
             Console.Write("Qual a quantidade de leitos atualmente?: ");
             if (int.TryParse(Console.ReadLine(), out int quantidadeLeitos))
-                if (quantidadeLeitos >= 1)
-                    configuracaoSistema.TotalLeitos = quantidadeLeitos;
-                else
+                configuracaoSistema.TotalLeitos = quantidadeLeitos;
+            else
+            {
+                Console.WriteLine("Número de leitos inválido");
+                ConfiguracoesSistema();
+            }
+
+            ProximoFilaInternacao();
+
+        }
+
+        public void ProximoFilaInternacao()
+        {
+            if (configuracaoSistema.PossuiVaga())
+            {
+                int quantidadeLeitos = configuracaoSistema.LeitosDisponiveis;
+                for (int i = 0; i < quantidadeLeitos; i++)
                 {
-                    Console.WriteLine("Número de leitos inválido");
-                    ConfiguracoesSistema();
+                    Paciente paciente = filaPacienteInternados.Pop();
+                    paciente.StatusPaciente = StatusPaciente.internado;
+
+                    listaPacientes.Editar(paciente);
+                    configuracaoSistema.LeitosOcupados++;
+
+                    Console.WriteLine("Pacientes Removidos da fila de internação:");
+                    Console.WriteLine(paciente.DadosMinimosPaciente());
+
                 }
+
+            }
 
         }
 

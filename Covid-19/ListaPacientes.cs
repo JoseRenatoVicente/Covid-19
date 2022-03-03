@@ -91,6 +91,28 @@ namespace Covid_19
             return paciente;
         }
 
+        public bool Editar(Paciente paciente)
+        {
+            Paciente buscaPaciente = Inicio;
+
+            if (EstaVazio()) return false;
+            else
+            {
+
+                while (paciente.Proximo != null)
+                {
+
+                    if (buscaPaciente.CPF == paciente.CPF)
+                    {
+                        buscaPaciente = paciente;
+                        return true;
+                    }
+                    paciente = paciente.Proximo;
+                }
+            }
+            return false;
+        }
+
         public Paciente Push(Paciente novoPaciente)
         {
             novoPaciente.Proximo = null;

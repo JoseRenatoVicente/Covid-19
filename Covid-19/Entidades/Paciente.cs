@@ -11,11 +11,9 @@ namespace Covid_19.Entities
         public string CPF { get; set; }
         //public Sexo Sexo { get; set; }
         public DateTime DataNascimento { get; set; }
-        public bool PassouTriagem { get; set; }
-        public bool EstaInternado { get; set; }
-
         public DateTime DataAlta { get; set; }
-
+        public StatusPaciente StatusPaciente { get; set; }
+        public bool TesteCovidPositivo { get; set; }
         public Triagem Triagem { get; set; }
         public Comorbidade[] Comorbidades { get; set; }
 
@@ -38,14 +36,13 @@ namespace Covid_19.Entities
             Triagem = new Triagem();
         }
 
-        public Paciente(string nome, string cpf, DateTime dataNascimento, int diasSintomas, bool possuiComorbidade, bool passouTriagem)
+        public Paciente(string nome, string cpf, DateTime dataNascimento, int diasSintomas, bool possuiComorbidade)
         {
             Nome = nome;
             CPF = cpf;
             DataNascimento = dataNascimento;
             Triagem.DiasSintomas = diasSintomas;
             Triagem.PossuiComorbidade = possuiComorbidade;
-            PassouTriagem = passouTriagem;
             Triagem = new Triagem();
         }
 
@@ -68,14 +65,14 @@ namespace Covid_19.Entities
                       CPF: {CPF}
                       Data de Nascimento: {DataNascimento.ToString("dd/MM/yyyy")}
                       Idade: {Idade}
-                      Esta Internado?: {(EstaInternado ? "Sim" : "Não")}
+                      Status Paciente?: {StatusPaciente}
                       Comorbidades: { comorbidades ?? "sem registros"}
-                      Possui Comorbidades?: {(Triagem.PossuiComorbidade ? "Sim" : "Não")}";
+                      Possui Comorbidades?: {(Triagem.PossuiComorbidade ? "Sim" : "Não")}
+                      {Triagem.DadosTriagem()}";
         }
 
         public string DadosMinimosPaciente()
         {
-
             return $@"
                       Senha: {Senha}
                       Nome: {Nome}
@@ -87,7 +84,7 @@ namespace Covid_19.Entities
 
         public string ConverterParaCSV()
         {
-            return $"{Nome};{CPF};{DataNascimento};{Triagem.DiasSintomas};{Triagem.PossuiComorbidade};{PassouTriagem}";
+            return $"{Nome};{CPF};{DataNascimento};{Triagem.DiasSintomas};{Triagem.PossuiComorbidade}";
         }
     }
 }

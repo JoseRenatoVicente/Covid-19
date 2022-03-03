@@ -68,7 +68,7 @@ Disponíveis: {service.configuracaoSistema.LeitosDisponiveis}
 
                 case "5":
                     Console.Clear();
-                    service.ConfiguracoesSistema();
+                    service.DarAltaPaciente();
                     BackMenu();
                     break;
 
