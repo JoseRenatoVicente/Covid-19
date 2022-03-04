@@ -17,34 +17,35 @@ namespace Covid_19
 
         public void LerArquivo()
         {
-            StreamReader sr = new StreamReader(NomeArquivo);
-
-            int count = 0;
-            string line = sr.ReadLine();
-
-            while (line != null)
-            {
-                string[] values = line.Split(';');
-
-                Paciente novoPaciente = new Paciente(values);
-
-                Paciente paciente = Inicio;
-                if (EstaVazio())
+            if (File.Exists(NomeArquivo))
+                using (StreamReader sr = new StreamReader(NomeArquivo))
                 {
-                    Inicio = Fim = novoPaciente;
-                }
-                else
-                {
-                    novoPaciente.Anterior = Fim;
-                    Fim.Proximo = novoPaciente;
-                    Fim = novoPaciente;
+                    int count = 0;
+                    string line = sr.ReadLine();
+
+                    while (line != null && line != "")
+                    {
+                        string[] values = line.Split(';');
+
+                        Paciente novoPaciente = new Paciente(values);
+
+                        Paciente paciente = Inicio;
+                        if (EstaVazio())
+                        {
+                            Inicio = Fim = novoPaciente;
+                        }
+                        else
+                        {
+                            novoPaciente.Anterior = Fim;
+                            Fim.Proximo = novoPaciente;
+                            Fim = novoPaciente;
+                        }
+
+                        count++;
+                        line = sr.ReadLine();
+                    }
                 }
 
-                count++;
-                line = sr.ReadLine();
-            }
-
-            sr.Close();
         }
 
         public void SalvarCSV()
