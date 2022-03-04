@@ -6,7 +6,7 @@ namespace Covid_19
 {
     internal class ServicoCovid
     {
-        public ListaPacientes listaPacientes = new ListaPacientes();
+        public ListaPacientes listaPacientes = new ListaPacientes("ListaPacientes.csv");
 
         public FilaPaciente filaPacientePreferencial = new FilaPaciente("FilaPacientePreferencial.csv");
         public FilaPaciente filaPacienteNormal = new FilaPaciente("FilaPacienteNormal.csv");
@@ -137,12 +137,6 @@ namespace Covid_19
                 contadorFilaPreferencial++;
             }
 
-            //Chama proximo paciente
-            //Adiciona suas informações adicionais
-            //Verifica se é caso de emergencia e manda para internação
-            // se não tem sintomas de covid apenas registra
-            //se ela apresenta sintomas mas nao grave ela vai para o exame
-
         }
 
         private Paciente EntradaDadosIniciaisPaciente(Paciente paciente)
@@ -265,9 +259,7 @@ namespace Covid_19
             {
                 Console.Write("Quantas: ");
                 if (Int32.TryParse(Console.ReadLine(), out int quantidade))
-                    if (quantidade >= 1)
-                        paciente.Triagem.Saturacao = quantidade;
-                    else
+                    if (quantidade < 1)
                     {
                         Console.WriteLine("A quantidade deve ser maior que 1");
                         EntradaDadosPaciente(paciente);
@@ -390,12 +382,6 @@ namespace Covid_19
 
             return pacientes[0];
         }
-
-        public Paciente EditarPaciente()
-        {
-            return new Paciente();
-        }
-
         public void ConfiguracoesSistema()
         {
             Console.Write("Qual a quantidade de leitos atualmente?: ");

@@ -17,5 +17,10 @@
             return false;
         }
 
+        public string ConverterParaCSV()
+        {
+            return $"{DificuldadeRespirar};{PerdaMotora};{PerdaPaladar};{PerdaOlfato}";
+        }
+
     }
 }

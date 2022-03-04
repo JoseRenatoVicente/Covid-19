@@ -1,4 +1,6 @@
 ﻿using Covid_19.Entities;
+using System;
+using System.IO;
 
 namespace Covid_19
 {
@@ -6,9 +8,64 @@ namespace Covid_19
     {
         public Paciente Inicio { get; set; }
         public Paciente Fim { get; set; }
-        public ListaPacientes()
+        private string NomeArquivo;
+        public ListaPacientes(string nomeArquivo)
         {
+            NomeArquivo = nomeArquivo;
             Inicio = Fim = null;
+        }
+
+        public void LerArquivo()
+        {
+            StreamReader sr = new StreamReader(NomeArquivo);
+
+            int count = 0;
+            string line = sr.ReadLine();
+
+            while (line != null)
+            {
+                string[] values = line.Split(';');
+
+                Paciente novoPaciente = new Paciente(values);
+
+                Paciente paciente = Inicio;
+                if (EstaVazio())
+                {
+                    Inicio = Fim = novoPaciente;
+                }
+                else
+                {
+                    novoPaciente.Anterior = Fim;
+                    Fim.Proximo = novoPaciente;
+                    Fim = novoPaciente;
+                }
+
+                count++;
+                line = sr.ReadLine();
+            }
+
+            sr.Close();
+        }
+
+        public void SalvarCSV()
+        {
+            StreamWriter sw = new StreamWriter(NomeArquivo);
+
+            if (EstaVazio())
+            {
+                sw.WriteLine();
+            }
+            else
+            {
+                Paciente paciente = Inicio;
+                while (paciente != null)
+                {
+                    sw.WriteLine(paciente.ConverterParaCSV());
+
+                    paciente = paciente.Proximo;
+                }
+            }
+            sw.Close();
         }
 
         public Paciente[] ObterTodos()
@@ -88,7 +145,7 @@ namespace Covid_19
                     paciente = paciente.Proximo;
                 }
             }
-            return paciente;
+            return null;
         }
 
         public bool Editar(Paciente paciente)
@@ -110,6 +167,7 @@ namespace Covid_19
                     paciente = paciente.Proximo;
                 }
             }
+            SalvarCSV();
             return false;
         }
 
@@ -129,7 +187,7 @@ namespace Covid_19
                 Fim.Proximo = novoPaciente;
                 Fim = novoPaciente;
             }
-
+            SalvarCSV();
             return novoPaciente;
         }
 
@@ -173,7 +231,7 @@ namespace Covid_19
                 } while (paciente != null);
 
             }
-
+            SalvarCSV();
             return true;
         }
 

@@ -28,6 +28,8 @@ namespace Covid_19.Entities
             Triagem = new Triagem();
         }
 
+
+
         public Paciente(string nome, string cpf, DateTime dataNascimento)
         {
             Nome = nome;
@@ -41,9 +43,9 @@ namespace Covid_19.Entities
             Nome = nome;
             CPF = cpf;
             DataNascimento = dataNascimento;
+            Triagem = new Triagem();
             Triagem.DiasSintomas = diasSintomas;
             Triagem.PossuiComorbidade = possuiComorbidade;
-            Triagem = new Triagem();
         }
 
         public bool PossuiNecessidadeInternacao()
@@ -57,8 +59,8 @@ namespace Covid_19.Entities
         {
             string comorbidades = "";
             if (Comorbidades != null)
-            foreach (var comorbidade in Comorbidades)
-                comorbidades += comorbidade.DadosComorbidade();
+                foreach (var comorbidade in Comorbidades)
+                    comorbidades += comorbidade.DadosComorbidade();
 
             return $@"
                       Nome: {Nome}
@@ -84,7 +86,52 @@ namespace Covid_19.Entities
 
         public string ConverterParaCSV()
         {
-            return $"{Nome};{CPF};{DataNascimento};{Triagem.DiasSintomas};{Triagem.PossuiComorbidade}";
+            string comorbidades = "";
+            if (Comorbidades != null)
+                foreach (var comorbidade in Comorbidades)
+                    comorbidades += comorbidade.ConverterParaCSV();
+
+            return $"{Nome};{CPF};{DataNascimento};{DataAlta};{StatusPaciente};{TesteCovidPositivo};{Triagem.ConverterParaCSV()};{comorbidades}";
+        }
+
+        public Paciente(string[] valores)
+        {
+            if (valores[0] != "") Nome = valores[0];
+            if (valores[1] != "") CPF = valores[1];
+            if (DateTime.TryParse(valores[2], out DateTime dataNascimento)) DataNascimento = dataNascimento;
+            if (DateTime.TryParse(valores[3], out DateTime dataAlta)) DataAlta = dataAlta;
+            if (valores[4] != "0") StatusPaciente = (StatusPaciente)Enum.Parse(typeof(StatusPaciente), valores[4]);
+            if (valores[5] == "True") TesteCovidPositivo = true;
+
+            Triagem = new Triagem();
+            //Triagem
+            if (double.TryParse(valores[6], out double pressao)) Triagem.Pressao = pressao;
+            if (int.TryParse(valores[7], out int batimentosCardiacos)) Triagem.BatimentosCardiacos = batimentosCardiacos;
+            if (int.TryParse(valores[8], out int saturacao)) Triagem.Saturacao = saturacao;
+            if (double.TryParse(valores[9], out double temperatura)) Triagem.Temperatura = temperatura;
+            if (int.TryParse(valores[10], out int diasSintomas)) Triagem.DiasSintomas = diasSintomas;
+            if (valores[11] == "True") Triagem.PossuiComorbidade = true;
+            if (valores[12] == "True") Triagem.ResultadoTesteCovid = true;
+
+            //Sintomas
+            if (valores[13] == "True") Triagem.SintomasCovid.DificuldadeRespirar = true;
+            if (valores[14] == "True") Triagem.SintomasCovid.PerdaMotora = true;
+            if (valores[15] == "True") Triagem.SintomasCovid.PerdaPaladar = true;
+            if (valores[16] == "True") Triagem.SintomasCovid.PerdaOlfato = true;
+            if (valores[17] != "")
+            {
+                Comorbidade[] comorbidades = new Comorbidade[valores[17].Split("|").Length - 1];
+
+                string[] valoresComobidade = valores[17].Split("|");
+
+                for (int i = 0; i < valoresComobidade.Length - 1; i++)
+                {
+                    comorbidades[i] = new Comorbidade(valoresComobidade[i]);
+                }
+
+                Comorbidades = comorbidades;
+            }
+
         }
     }
 }

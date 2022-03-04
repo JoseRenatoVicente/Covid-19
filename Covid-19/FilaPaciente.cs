@@ -15,41 +15,44 @@ namespace Covid_19
         public FilaPaciente(string nomeArquivo)
         {
             NomeArquivo = nomeArquivo;
-            //LerArquivo();
-
             Inicio = Fim = null;
         }
 
         public void LerArquivo()
         {
-            StreamReader sr = new StreamReader(NomeArquivo);
+            if (File.Exists(NomeArquivo))
+                using (StreamReader sr = new StreamReader(NomeArquivo))
+                {
+                    int count = 0;
+                    string line = sr.ReadLine();
 
-            int count = 0;
-            string line = sr.ReadLine();
+                    while (line != null && line != "")
+                    {
+                        string[] values = line.Split(';');
 
-            while (line != "")
-            {
-                Paciente paciente = new Paciente();
-                String[] values = line.Split(';');
+                        Paciente novoPaciente = new Paciente(values);
 
+                        Paciente paciente = Inicio;
+                        if (EstaVazio())
+                        {
+                            Inicio = Fim = novoPaciente;
+                        }
+                        else
+                        {
+                            novoPaciente.Anterior = Fim;
+                            Fim.Proximo = novoPaciente;
+                            Fim = novoPaciente;
+                        }
 
-                paciente.Nome = values[0];
-                paciente.CPF = values[1];
-                //paciente.DataNascimento = DateTime.Parse(values[2]);
-                //paciente.Triagem.DiasSintomas = Convert.ToInt32(dias);
-                //paciente.Triagem.PossuiComorbidade = bool.Parse(values[4]);
-                //paciente.PassouTriagem = bool.Parse(values[5]);
+                        count++;
+                        line = sr.ReadLine();
+                    }
+                }
 
-                paciente.Proximo = null;
-
-                Push(paciente);
-
-                count++;
-                line = sr.ReadLine();
-            }
-
-            sr.Close();
         }
+
+
+
         public Paciente[] ObterTodos()
         {
             Paciente[] pacientes = new Paciente[Count()];
