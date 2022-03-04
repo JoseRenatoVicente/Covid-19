@@ -11,6 +11,11 @@ namespace Covid_19.Entities
 
         }
 
+        public Comorbidade(string nomeComorbidade)
+        {
+            NomeComorbidade = nomeComorbidade;
+        }
+
         public string DadosComorbidade()
         {
             return $@"

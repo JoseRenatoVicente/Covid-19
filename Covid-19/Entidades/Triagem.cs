@@ -31,5 +31,9 @@
                        Dias Sintomas: {DiasSintomas}";
         }
 
+        public string ConverterParaCSV()
+        {
+            return $"{Pressao};{BatimentosCardiacos};{Saturacao};{Temperatura};{DiasSintomas};{PossuiComorbidade};{ResultadoTesteCovid};{SintomasCovid.ConverterParaCSV()}";
+        }
     }
 }
